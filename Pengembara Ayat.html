@@ -1,0 +1,89 @@
+<!DOCTYPE html><html lang="ms"><head><meta charset="utf-8"><title>Pengembara Ayat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#EAF3F8;--card:#fff;--tx:#1d2733;--nv:#1F3A5F;--tl:#2A9D8F;--gd:#E9C46A;--ok:#1b7f4b;--okb:#d8f3e4;--no:#b3261e;--nob:#fde4e1;--bd:#c5d0da;--sel:#fff3c4;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1823;--card:#1c2735;--tx:#e8eef5;--nv:#8fb4e3;--tl:#3dbdae;--ok:#6fdc9f;--okb:#17382a;--no:#ff8f86;--nob:#3d1c19;--bd:#3a4d63;--sel:#4a4220;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1823;--card:#1c2735;--tx:#e8eef5;--nv:#8fb4e3;--tl:#3dbdae;--ok:#6fdc9f;--okb:#17382a;--no:#ff8f86;--nob:#3d1c19;--bd:#3a4d63;--sel:#4a4220;color-scheme:dark}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:inherit}body{margin:0;background:var(--bg);color:var(--tx);font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;font-size:18px;touch-action:manipulation}
+main{max-width:720px;margin:0 auto;padding:14px}h1{color:var(--nv);font-size:26px;margin:4px 0}h2{color:var(--nv);font-size:20px;margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:16px;margin:10px 0}
+.hud{display:flex;justify-content:space-between;align-items:center;font-weight:bold;color:var(--nv);gap:8px}
+.bar{height:10px;background:var(--bd);border-radius:6px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--tl);transition:width .4s}
+button{font:inherit;font-weight:bold;border:0;border-radius:12px;padding:12px 16px;min-height:48px;cursor:pointer;background:var(--tl);color:#08201d}
+button.k{background:var(--nv);color:var(--bg)}button.g{background:transparent;border:2px solid var(--bd);color:var(--tx)}.full{width:100%;margin-top:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tile{background:var(--card);color:var(--tx);border:2px solid var(--tl);border-radius:12px;padding:10px 14px;touch-action:none;user-select:none;cursor:grab;transition:transform .15s}
+.tile:hover{transform:translateY(-2px)}.tile.chip{touch-action:manipulation}
+.slots{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0;font-size:20px}
+.slot{min-width:84px;min-height:50px;border:3px dashed var(--bd);border-radius:12px;display:flex;align-items:center;justify-content:center;padding:2px}
+.slot.over{border-color:var(--gd);background:var(--sel)}.slot .tile{border-color:var(--nv)}
+.pool{display:flex;flex-wrap:wrap;gap:10px;min-height:56px;padding:10px;background:var(--bg);border-radius:12px}
+.ghost{position:fixed;pointer-events:none;z-index:50;opacity:.9;transform:translate(-50%,-50%) scale(1.1);box-shadow:0 6px 16px #0005}
+.shake{animation:sh .4s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.good{animation:pop .5s}@keyframes pop{50%{transform:scale(1.06);background:var(--okb)}}
+.fb{padding:12px;border-radius:10px;margin-top:10px;font-weight:bold}.fb.ok{background:var(--okb);color:var(--ok)}.fb.no{background:var(--nob);color:var(--no)}
+.out{font-size:24px;font-weight:bold;color:var(--nv);text-align:center;min-height:44px;margin:10px 0}
+.big{font-size:56px;text-align:center}.sm{font-size:15px;opacity:.85}p{margin:6px 0}
+.cf{position:fixed;top:-30px;font-size:26px;z-index:60;pointer-events:none;animation:fall 1.8s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
+</style></head><body><main><h1>Pengembara Ayat 🧭</h1><div id="app" aria-live="polite"></div></main>
+<script>
+const L1=[["Cikgu Aminah","mengajar","di","kelas"],["Mei Ling","bermain","di","padang"],["Amin","berjalan","ke","sekolah"],["Murid","melihat","Sungai Rajang"],["Kawan Amin","membaca","buku","di","kelas"]];
+const L2=[{a:"",b:" ialah murid di SK Rajang.",o:["Amin","meja","terbang"],r:"Amin",k:"khas"},{a:"",b:" mengajar murid di kelas.",o:["Guru","awan","kasut"],r:"Guru",k:"am"},{a:"Kami bermain di ",b:".",o:["padang","menyanyi","cepat"],r:"padang",k:"am"},{a:"Bot itu melalui ",b:" yang panjang.",o:["Sungai Rajang","makan","biru"],r:"Sungai Rajang",k:"khas"},{a:"",b:" ialah kawan baik Amin.",o:["Mei Ling","pensel","tinggi"],r:"Mei Ling",k:"khas"}];
+const KH=["Amin","Mei Ling","Sungai Rajang"],AM=["guru","murid","kawan","sekolah","padang","buku"],KJ=["bermain","berjalan","melihat","membaca"],SD=["di","ke"];
+const BANK=[...KH,...AM,...KJ,...SD];
+const L3=[{t:"Bina ayat dengan 1 kata nama khas, 1 kata nama am dan 1 kata kerja.",f:c=>c.kh>=1&&c.am>=1&&c.kj>=1},{t:"Bina ayat dengan 2 kata nama khas dan 1 kata kerja.",f:c=>c.kh>=2&&c.kj>=1},{t:"Bina ayat dengan kata sendi (di / ke), 1 kata nama am dan 1 kata kerja.",f:c=>c.sd>=1&&c.am>=1&&c.kj>=1}];
+const app=document.getElementById("app");const S={ph:"mula",i:0,sc:0,h:3,st:0,base:0,slots:[],pool:[],done:false,ws:[],tries:0};
+const shuf=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+let AC;function beep(f,d,t){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t||"sine";o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}}
+const yay=()=>{[523,659,784].forEach((f,k)=>setTimeout(()=>beep(f,.15),k*110))},oops=()=>beep(180,.3,"square");
+function say(t){try{if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="ms-MY";u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+function conf(){const e=["🎉","⭐","✨","🎈","🌟"];for(let k=0;k<22;k++){const s=document.createElement("span");s.className="cf";s.textContent=e[k%5];s.style.left=Math.random()*95+"vw";s.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(s);setTimeout(()=>s.remove(),2400)}}
+const total=()=>L1.length+L2.length+L3.length;
+const prog=()=>{const n=S.ph==="l1"?S.i:S.ph==="l2"?L1.length+S.i:S.ph==="l3"?L1.length+L2.length+S.i:0;return Math.round(n/total()*100)};
+function hud(){return '<div class="hud"><span>Tahap '+S.ph.slice(1)+' • Soalan '+(S.i+1)+'</span><span>'+(S.ph!=="l3"?"❤️".repeat(S.h)+"🖤".repeat(3-S.h):"")+'</span><span>⭐ '+S.sc+(S.st>1?' 🔥'+S.st:'')+'</span></div><div class="bar"><i style="width:'+prog()+'%"></i></div>'}
+function award(){S.st++;const p=10+Math.max(0,S.st-1)*2;S.sc+=p;yay();conf();return p}
+function miss(){S.st=0;S.h--;oops()}
+function setup(){S.done=false;if(S.ph==="l1"){const w=L1[S.i];S.slots=w.map(()=>null);S.pool=shuf(w.map((x,k)=>({id:k,w:x})))}
+else if(S.ph==="l2"){const q=L2[S.i];S.slots=[null];S.pool=shuf(q.o.map((x,k)=>({id:k,w:x})))}
+else{S.ws=[];S.tries=0}render()}
+function tile(t,src){return '<button class="tile" data-id="'+t.id+'" data-src="'+src+'">'+t.w+'</button>'}
+function render(){
+if(S.ph==="mula"){app.innerHTML='<div class="card"><div class="big">🏝️</div><h2>Misi Pulau Rajang</h2><p>Amin dan Mei Ling perlukan bantuan anda! Seret perkataan ke tempat yang betul untuk membina ayat.</p><p class="sm">Tahap 1: Susun ayat • Tahap 2: Isi tempat kosong • Tahap 3: Cipta ayat sendiri. Anda ada 3 nyawa ❤️ pada setiap tahap.</p><button class="k full" onclick="go(\'l1\')">Mula Pengembaraan</button></div>';return}
+if(S.ph==="l1"||S.ph==="l2"){const q=S.ph==="l2"?L2[S.i]:null;let row;
+if(S.ph==="l1")row=S.slots.map((s,k)=>'<div class="slot" data-slot="'+k+'">'+(s?tile(s,k):'')+'</div>').join("");
+else row=(q.a?'<span>'+q.a+'</span>':'')+'<div class="slot" data-slot="0">'+(S.slots[0]?tile(S.slots[0],0):'')+'</div><span>'+q.b+'</span>';
+app.innerHTML=hud()+'<div class="card"><h2>'+(S.ph==="l1"?"Susun perkataan menjadi ayat yang betul":"Seret kata nama yang sesuai ke tempat kosong")+'</h2><div class="slots" id="sl">'+row+'</div><div class="pool">'+S.pool.map(t=>tile(t,"p")).join("")+'</div><div id="fb"></div></div>';return}
+if(S.ph==="l3"){const m=L3[S.i];const s=sent();app.innerHTML=hud()+'<div class="card"><h2>Tahap 3: Cipta Ayat Sendiri</h2><p><b>Misi:</b> '+m.t+'</p><div class="out">'+(s||"…")+'</div><div class="pool">'+BANK.map(w=>'<button class="tile chip" onclick="addw(\''+w+'\')">'+w+'</button>').join("")+'</div><div class="row" style="margin-top:10px"><button class="g" onclick="S.ws.pop();render()">⌫ Padam</button><button class="g" onclick="S.ws=[];render()">Kosongkan</button><button class="g" onclick="say(sent())">🔊 Dengar</button></div><div id="fb"></div>'+(S.done?'<button class="k full" onclick="next()">Seterusnya</button>':'<button class="k full" onclick="chk3()">Semak Ayat</button>')+'</div>';return}
+if(S.ph==="over"){app.innerHTML='<div class="card" style="text-align:center"><div class="big">💔</div><h2>Nyawa habis!</h2><p>Jangan putus asa. Cuba semula tahap ini.</p><button class="k full" onclick="S.h=3;S.sc=S.base;S.st=0;S.i=0;S.ph=S.back;setup()">Cuba Semula</button></div>';return}
+const mx=L1.length*10+L2.length*10+L3.length*20;app.innerHTML='<div class="card" style="text-align:center"><div class="big">'+(S.sc>=mx*.8?"🏆":"🌟")+'</div><h2>Tahniah, pengembara! Markah: '+S.sc+'</h2><p>'+(S.sc>=mx*.8?"Cemerlang! Anda pakar membina ayat.":"Bagus! Main lagi untuk markah yang lebih tinggi.")+'</p><button class="k full" onclick="S.sc=0;S.h=3;S.st=0;S.ph=\'mula\';render()">Main Semula</button></div>'}
+function go(p){S.ph=p;S.i=0;S.h=3;S.base=S.sc;setup()}
+function sent(){if(!S.ws.length)return"";let t=S.ws.join(" ");return t[0].toUpperCase()+t.slice(1)+"."}
+function addw(w){S.ws.push(w);beep(440,.06);render()}
+function cnt(){const c={kh:0,am:0,kj:0,sd:0};S.ws.forEach(w=>{if(KH.includes(w))c.kh++;if(AM.includes(w))c.am++;if(KJ.includes(w))c.kj++;if(SD.includes(w))c.sd++});return c}
+function chk3(){const m=L3[S.i];if(S.ws.length<3){fb("no","Gunakan sekurang-kurangnya 3 perkataan.");oops();return}
+S.tries++;if(m.f(cnt())){const p=S.tries===1?20:10;S.sc+=p;S.done=true;yay();conf();render();fb("ok","Hebat! +"+p+" mata. Ayat anda: “"+sent()+"”");say(sent())}else{oops();fb("no","Belum menepati misi. Semak semula jenis perkataan yang diminta, kemudian cuba lagi.")}}
+function fb(c,t){const e=document.getElementById("fb");if(e)e.innerHTML='<div class="fb '+c+'">'+t+'</div>'}
+function place(id,src,dst){// dst: slot index
+let t;if(src==="p"){const k=S.pool.findIndex(x=>x.id==id);t=S.pool.splice(k,1)[0]}else{t=S.slots[src];S.slots[src]=null}
+const cur=S.slots[dst];if(cur)S.pool.push(cur);S.slots[dst]=t;beep(600,.05);render();after()}
+function unplace(src){S.pool.push(S.slots[src]);S.slots[src]=null;render()}
+function after(){if(S.slots.some(s=>!s))return;const el=document.getElementById("sl");
+if(S.ph==="l1"){const w=S.slots.map(s=>s.w).join(" "),ok=w===L1[S.i].join(" ");res(ok,w+".",el)}
+else{const q=L2[S.i],ok=S.slots[0].w===q.r;res(ok,q.a+q.r+q.b,el,q.k)}}
+function res(ok,txt,el,k){if(ok){S.done=true;const p=award();el.classList.add("good");fb("ok","Betul! +"+p+" mata"+(k?" • “"+L2[S.i].r+"” ialah kata nama "+k+".":"")+' <button class="g" onclick="say(\''+txt.replace(/'/g,"")+'\')">🔊</button>');say(txt);app.querySelector(".card").insertAdjacentHTML("beforeend",'<button class="k full" onclick="next()">Seterusnya</button>')}
+else{miss();el.classList.add("shake");if(S.h<=0){setTimeout(()=>{S.back=S.ph;S.ph="over";render()},700);return}
+setTimeout(()=>{S.pool.push(...S.slots.filter(Boolean));S.slots=S.slots.map(()=>null);render();fb("no","Belum tepat. Cuba lagi! Nyawa tinggal "+S.h+".")},650)}}
+function next(){S.i++;const n=S.ph==="l1"?L1.length:S.ph==="l2"?L2.length:L3.length;
+if(S.i>=n){if(S.ph==="l1")return go("l2");if(S.ph==="l2")return go("l3");conf();S.ph="tamat";return render()}setup()}
+// drag & tap
+let D=null;
+app.addEventListener("pointerdown",e=>{const t=e.target.closest(".tile[data-id]");if(!t||S.done)return;D={t,x:e.clientX,y:e.clientY,g:null,id:t.dataset.id,src:t.dataset.src};t.setPointerCapture(e.pointerId)});
+app.addEventListener("pointermove",e=>{if(!D)return;if(!D.g&&Math.hypot(e.clientX-D.x,e.clientY-D.y)>8){D.g=D.t.cloneNode(true);D.g.classList.add("ghost");document.body.appendChild(D.g);D.t.style.opacity=.3}
+if(D.g){D.g.style.left=e.clientX+"px";D.g.style.top=e.clientY+"px";document.querySelectorAll(".slot").forEach(s=>s.classList.remove("over"));const s=document.elementFromPoint(e.clientX,e.clientY)?.closest(".slot");if(s)s.classList.add("over")}});
+app.addEventListener("pointerup",e=>{if(!D)return;const d=D;D=null;if(d.g){d.g.remove();const s=document.elementFromPoint(e.clientX,e.clientY)?.closest(".slot");if(s)place(d.id,d.src==="p"?"p":+d.src,+s.dataset.slot);else render();return}
+if(d.src==="p"){const k=S.slots.findIndex(s=>!s);if(k>=0)place(d.id,"p",k)}else unplace(+d.src)});
+app.addEventListener("pointercancel",()=>{if(D&&D.g)D.g.remove();D=null;render()});
+render();
+</script></body></html>
